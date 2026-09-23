@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: LY Haw Job Talent recruitment API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Public recruitment posts
+  - name: companies
+    description: Public client companies
+  - name: articles
+    description: HR and career articles
+  - name: dashboard
+    description: Staff dashboard summaries
 paths:
   /healthz:
     get:
@@ -24,7 +32,182 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: Browse published recruitment posts
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Location"
+        - $ref: "#/components/parameters/JobType"
+        - $ref: "#/components/parameters/WorkArrangement"
+        - $ref: "#/components/parameters/Featured"
+        - $ref: "#/components/parameters/Urgent"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, deadline, salary]
+            default: newest
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 24
+            default: 12
+      responses:
+        "200":
+          description: Paged published recruitment posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListResponse"
+  /jobs/{slug}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: View a published recruitment post
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recruitment post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Job not found
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: Browse active client companies
+      responses:
+        "200":
+          description: Client companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+  /companies/{slug}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      summary: View a client company and its published jobs
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Client company detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyDetail"
+        "404":
+          description: Company not found
+  /articles:
+    get:
+      operationId: listArticles
+      tags: [articles]
+      summary: Browse published HR articles
+      responses:
+        "200":
+          description: HR articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Article"
+  /articles/{slug}:
+    get:
+      operationId: getArticle
+      tags: [articles]
+      summary: View an HR article
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HR article detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleDetail"
+        "404":
+          description: Article not found
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get staff recruitment dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
 components:
+  parameters:
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+    Category:
+      name: category
+      in: query
+      schema:
+        type: string
+    Location:
+      name: location
+      in: query
+      schema:
+        type: string
+    JobType:
+      name: jobType
+      in: query
+      schema:
+        type: string
+    WorkArrangement:
+      name: workArrangement
+      in: query
+      schema:
+        type: string
+    Featured:
+      name: featured
+      in: query
+      schema:
+        type: boolean
+    Urgent:
+      name: urgent
+      in: query
+      schema:
+        type: boolean
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +216,152 @@ components:
           type: string
       required:
         - status
+    Media:
+      type: object
+      required: [type, url, alt]
+      properties:
+        type:
+          type: string
+          enum: [logo, cover, poster, gallery]
+        url:
+          type: string
+        alt:
+          type: string
+        caption:
+          type: ["string", "null"]
+    Company:
+      type: object
+      required: [id, name, slug, industry, location, verified, logo, description, website]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        industry: { type: string }
+        location: { type: string }
+        verified: { type: boolean }
+        logo: { type: string }
+        description: { type: string }
+        website: { type: ["string", "null"] }
+    Job:
+      type: object
+      required:
+        [id, reference, slug, titleKhmer, titleEnglish, position, company,
+         category, location, jobType, workArrangement, salary, vacancies,
+         experience, education, summary, description, responsibilities,
+         requirements, skills, benefits, applicationInstructions,
+         applicationEmail, applicationPhone, telegram, publishedAt, deadline,
+         featured, urgent, coverImage, posterImage, gallery]
+      properties:
+        id: { type: string }
+        reference: { type: string }
+        slug: { type: string }
+        titleKhmer: { type: string }
+        titleEnglish: { type: string }
+        position: { type: string }
+        company:
+          $ref: "#/components/schemas/Company"
+        category: { type: string }
+        location: { type: string }
+        jobType: { type: string }
+        workArrangement: { type: string }
+        salary: { type: string }
+        vacancies: { type: integer }
+        experience: { type: string }
+        education: { type: string }
+        summary: { type: string }
+        description: { type: string }
+        responsibilities:
+          type: array
+          items: { type: string }
+        requirements:
+          type: array
+          items: { type: string }
+        skills:
+          type: array
+          items: { type: string }
+        benefits:
+          type: array
+          items: { type: string }
+        applicationInstructions: { type: string }
+        applicationEmail: { type: string }
+        applicationPhone: { type: string }
+        telegram: { type: string }
+        publishedAt: { type: string, format: date }
+        deadline: { type: string, format: date }
+        featured: { type: boolean }
+        urgent: { type: boolean }
+        coverImage:
+          type: ["string", "null"]
+        posterImage:
+          type: ["string", "null"]
+        gallery:
+          type: array
+          items:
+            $ref: "#/components/schemas/Media"
+    JobListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+        meta:
+          $ref: "#/components/schemas/Pagination"
+    Pagination:
+      type: object
+      required: [page, limit, total, totalPages]
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+    CompanyDetail:
+      allOf:
+        - $ref: "#/components/schemas/Company"
+        - type: object
+          required: [jobs]
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: "#/components/schemas/Job"
+    Article:
+      type: object
+      required: [id, slug, title, excerpt, category, publishedAt, readTime, image]
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        excerpt: { type: string }
+        category: { type: string }
+        publishedAt: { type: string, format: date }
+        readTime: { type: string }
+        image: { type: string }
+    ArticleDetail:
+      allOf:
+        - $ref: "#/components/schemas/Article"
+        - type: object
+          required: [body]
+          properties:
+            body: { type: string }
+    DashboardSummary:
+      type: object
+      required:
+        [totalJobs, draftJobs, scheduledJobs, publishedJobs, featuredJobs,
+         urgentJobs, closingSoon, closedJobs, expiredJobs, archivedJobs,
+         companies, categories]
+      properties:
+        totalJobs: { type: integer }
+        draftJobs: { type: integer }
+        scheduledJobs: { type: integer }
+        publishedJobs: { type: integer }
+        featuredJobs: { type: integer }
+        urgentJobs: { type: integer }
+        closingSoon: { type: integer }
+        closedJobs: { type: integer }
+        expiredJobs: { type: integer }
+        archivedJobs: { type: integer }
+        companies: { type: integer }
+        categories: { type: integer }
 

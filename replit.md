@@ -1,10 +1,11 @@
-# [Project name]
+# LY Haw Job Talent
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Khmer-first recruitment website and staff dashboard for LY Haw HR Solution.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/lyhaw-job-talent run dev` — run the public recruitment website
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -22,23 +23,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/lyhaw-job-talent/src/App.tsx` — public and staff dashboard routes
+- `artifacts/lyhaw-job-talent/src/index.css` — design tokens, Kantumruy Pro typography, and global styles
+- `artifacts/api-server/src/routes/` — typed public API routes
+- `artifacts/api-server/src/lib/recruitment-data.ts` — development recruitment dataset
+- `lib/api-spec/openapi.yaml` — source of truth for API contracts
+- `lib/api-client-react/src/generated/` — generated React Query hooks and types
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The public app is a single React + Vite artifact at `/`, backed by the shared Express API at `/api`.
+- The first usable build uses a typed in-process recruitment dataset so the preview is populated immediately; the API contract is ready for PostgreSQL persistence.
+- All public API calls use generated OpenAPI hooks rather than raw fetch calls.
+- Dates are modeled as `Date` values on the server and serialize as ISO dates in API responses.
+- Khmer copy uses Kantumruy Pro first, with Manrope as the Latin fallback.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Visitors can browse, search, filter, and sort recruitment posts; open full job details; browse companies and HR articles; use application/contact/share actions; and read recruitment safety guidance. Staff have a summary dashboard at `/admin`.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Use Khmer as the default language and Kantumruy/Kantumruy Pro for Khmer UI text.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The artifact workflow supplies `PORT` and `BASE_PATH`; do not hard-code either in the app.
+- If the OpenAPI spec changes, run `pnpm --filter @workspace/api-spec run codegen` before typechecking leaf packages.
 
 ## Pointers
 

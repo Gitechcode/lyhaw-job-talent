@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "LY Haw Job Talent"
+description = "A Khmer-first recruitment website for LY Haw HR Solution, with searchable job listings, detailed recruitment posts, company profiles, and staff-managed publishing workflows."
+version = "1.0.0"
+id = "artifacts/lyhaw-job-talent"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21145
+
+[services.development]
+run = "pnpm --filter @workspace/lyhaw-job-talent run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lyhaw-job-talent", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lyhaw-job-talent/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21145"
+BASE_PATH = "/"
