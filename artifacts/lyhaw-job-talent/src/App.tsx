@@ -26,11 +26,18 @@ function formatDate(value?: string | null) {
 }
 
 function MediaPlaceholder({ label = 'LY HAW', className = '' }: { label?: string; className?: string }) {
-  return <div data-testid="media-placeholder" className={`flex min-h-28 items-center justify-center bg-[#e8ede9] text-center text-xs font-bold tracking-[.18em] text-primary/45 ${className}`}><span>{label}</span></div>;
+  return <div data-testid="media-placeholder" className={`media-placeholder relative flex min-h-28 items-center justify-center overflow-hidden text-center ${className}`}>
+    <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full border border-primary/10" />
+    <div className="absolute -bottom-14 -left-8 h-28 w-28 rounded-full border border-accent/15" />
+    <div className="relative z-10 flex flex-col items-center gap-2">
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-xs font-extrabold tracking-normal text-primary-foreground shadow-sm">LH</span>
+      <span className="text-[10px] font-extrabold uppercase tracking-[.18em] text-primary/55">{label}</span>
+    </div>
+  </div>;
 }
 
 function ImgOrPlaceholder({ src, alt, className = '', label }: { src?: string | null; alt: string; className?: string; label?: string }) {
-  if (!src) return <MediaPlaceholder label={label} className={className} />;
+  if (!src?.trim()) return <MediaPlaceholder label={label} className={className} />;
   return <img src={src} alt={alt} className={`object-cover ${className}`} onError={(event) => { event.currentTarget.style.display = 'none'; event.currentTarget.parentElement?.classList.add('media-failed'); }} />;
 }
 
@@ -93,12 +100,12 @@ function SearchPanel({ compact = false }: { compact?: boolean }) {
 
 function JobCard({ job, featured = false }: { job: Job; featured?: boolean }) {
   return <Link href={`/jobs/${job.slug}`} data-testid={`card-job-${job.id}`} className={`group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${featured ? 'md:grid md:grid-cols-[.85fr_1.15fr]' : ''}`}>
-    {featured && <div className="relative min-h-52 md:min-h-full"><ImgOrPlaceholder src={job.coverImage || job.posterImage} alt={job.titleEnglish} label="FEATURED ROLE" className="h-full w-full" />{job.urgent && <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-[11px] font-bold text-accent-foreground">ត្រូវការបន្ទាន់</span>}</div>}
+    <div className={`relative ${featured ? 'min-h-52 md:min-h-full' : 'h-28'}`}><ImgOrPlaceholder src={job.coverImage || job.posterImage} alt={job.titleEnglish} label={featured ? 'FEATURED ROLE' : job.company.name.slice(0, 2)} className="h-full w-full" />{job.urgent && <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-[11px] font-bold text-accent-foreground">ត្រូវការបន្ទាន់</span>}</div>
     <div className="p-5 sm:p-6">
       <div className="mb-3 flex items-start justify-between gap-3"><div className="flex flex-wrap gap-2"><span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-bold text-primary">{job.category}</span>{!featured && job.urgent && <span className="rounded-full bg-accent/10 px-2.5 py-1 text-[11px] font-bold text-accent">បន្ទាន់</span>}</div><span className="text-xs text-muted-foreground">{job.reference}</span></div>
       <h3 data-testid={`text-job-title-${job.id}`} className="text-lg font-bold leading-snug text-primary group-hover:text-accent">{job.titleKhmer || job.titleEnglish}</h3>
       {job.titleEnglish && <p className="mt-1 text-xs text-muted-foreground">{job.titleEnglish}</p>}
-      <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-foreground"><Building2Icon /> {job.company.name}</p>
+      <p className="mt-4 flex items-center gap-2 text-sm font-semibold text-foreground"><Building2Icon /> <span className="truncate">{job.company.name}</span>{job.company.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-accent" />}</p>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground"><span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-accent" />{job.location}</span><span className="flex items-center gap-1"><BriefcaseBusiness className="h-3.5 w-3.5 text-accent" />{job.jobType}</span><span className="flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5 text-accent" />{formatDate(job.deadline)}</span></div>
       <div className="mt-5 flex items-center justify-between border-t border-border pt-4"><span className="text-sm font-bold text-primary">{job.salary || 'ប្រាក់ខែពិភាក្សា'}</span><ArrowRight className="h-4 w-4 text-accent transition-transform group-hover:translate-x-1" /></div>
     </div>
@@ -151,7 +158,9 @@ function JobsPage() {
   const [location, setLocation] = useLocation();
   const qs = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
   const rawPage = Number(qs.get('page') || 1);
-  const params: ListJobsParams = { search: qs.get('search') || undefined, category: qs.get('category') || undefined, location: qs.get('location') || undefined, jobType: qs.get('jobType') || undefined, workArrangement: qs.get('workArrangement') || undefined, featured: qs.get('featured') === 'true' ? true : undefined, urgent: qs.get('urgent') === 'true' ? true : undefined, sort: (qs.get('sort') as ListJobsParams['sort']) || 'newest', page: Number.isFinite(rawPage) ? rawPage : 1, limit: 9 };
+  const selectedLocation = qs.get('location');
+  const locationParam = selectedLocation === 'ភ្នំពេញ' ? 'Phnom Penh' : selectedLocation === 'សៀមរាប' ? 'Siem Reap' : undefined;
+  const params: ListJobsParams = { search: qs.get('search') || undefined, category: qs.get('category') || undefined, location: locationParam, jobType: qs.get('jobType') || undefined, workArrangement: qs.get('workArrangement') || undefined, featured: qs.get('featured') === 'true' ? true : undefined, urgent: qs.get('urgent') === 'true' ? true : undefined, sort: (qs.get('sort') as ListJobsParams['sort']) || 'newest', page: Number.isFinite(rawPage) ? rawPage : 1, limit: 9 };
   const query = useListJobs(params);
   const update = (key: string, value: string) => { const next = new URLSearchParams(qs); if (value) next.set(key, value); else next.delete(key); next.delete('page'); setLocation(`/jobs${next.toString() ? `?${next}` : ''}`); };
   const data = query.data;
