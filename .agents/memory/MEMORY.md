@@ -1,1 +1,2 @@
 - [LY Haw recruitment UI](lyhaw-recruitment.md) — Khmer-first public recruitment app; preserve Kantumruy Pro and Date-to-ISO API boundary.
+- [API client codegen typing](api-codegen-quirk.md) — add DOM iterable types when generated request helpers use Headers.entries.

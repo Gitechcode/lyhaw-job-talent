@@ -1,13 +1,16 @@
-import { type FormEvent, type ReactNode, useMemo, useState } from 'react';
+import { type FormEvent, type ReactNode, useMemo, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useGetArticle, useGetCompany, useGetDashboard, useGetJob, useListArticles, useListCompanies, useListJobs } from '@workspace/api-client-react';
+import { useGetArticle, useGetCompany, useGetDashboard, useGetJob, useListArticles, useListCompanies, useListJobs, useRequestUploadUrl } from '@workspace/api-client-react';
 import type { Article, ArticleDetail, Company, CompanyDetail, DashboardSummary, Job, ListJobsParams } from '@workspace/api-client-react';
-import { ArrowRight, BadgeCheck, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Facebook, Filter, Instagram, Mail, MapPin, Menu, Phone, Search, Send, Share2, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { ArrowRight, BadgeCheck, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Facebook, Filter, Instagram, Mail, MapPin, Menu, Music2, Phone, Search, Send, Share2, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
+import businessTeamImage from '@assets/generated_images/lyhaw-business-team.jpg';
+import techTeamImage from '@assets/generated_images/lyhaw-tech-team.jpg';
+import hospitalityImage from '@assets/generated_images/lyhaw-hospitality.jpg';
 
 const queryClient = new QueryClient();
 
@@ -36,8 +39,15 @@ function MediaPlaceholder({ label = 'LY HAW', className = '' }: { label?: string
   </div>;
 }
 
+function getMediaImage(alt: string) {
+  const normalized = alt.toLowerCase();
+  if (/(developer|engineer|technology|software|data|it support|designer|product|qa|devops|analyst|technical)/.test(normalized)) return techTeamImage;
+  if (/(hotel|hospitality|guest|chef|restaurant|front office|housekeeping|reservation|concierge|tour|spa|barista)/.test(normalized)) return hospitalityImage;
+  return businessTeamImage;
+}
+
 function ImgOrPlaceholder({ src, alt, className = '', label }: { src?: string | null; alt: string; className?: string; label?: string }) {
-  if (!src?.trim()) return <MediaPlaceholder label={label} className={className} />;
+  if (!src?.trim()) return <div className={`relative overflow-hidden ${className}`}><img src={getMediaImage(alt)} alt={alt} className="h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-primary/75 via-primary/10 to-transparent" /><span className="absolute bottom-3 left-3 rounded-full bg-background/85 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[.16em] text-primary">{label || 'LY HAW'}</span></div>;
   return <img src={src} alt={alt} className={`object-cover ${className}`} onError={(event) => { event.currentTarget.style.display = 'none'; event.currentTarget.parentElement?.classList.add('media-failed'); }} />;
 }
 
@@ -70,18 +80,23 @@ function Header() {
 }
 
 function Footer() {
+  const socialLinks = [
+    { href: 'https://web.facebook.com/lyhawhrsolution', label: 'Facebook', icon: <Facebook className="h-4 w-4" />, testId: 'link-facebook' },
+    { href: 'https://www.tiktok.com/@ly.haw.hr.solution', label: 'TikTok', icon: <Music2 className="h-4 w-4" />, testId: 'link-tiktok' },
+    { href: 'https://t.me/lyhawhrsolution', label: 'Telegram', icon: <Send className="h-4 w-4" />, testId: 'link-telegram' },
+  ];
   return <footer className="mt-20 border-t border-border bg-primary text-primary-foreground">
     <div className="container-wide grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-      <div><Logo /><p className="mt-5 max-w-xs text-sm leading-7 text-primary-foreground/70">បណ្តាញការងារដែលជួយអ្នកស្វែងរកឱកាសពិតប្រាកដនៅកម្ពុជា ដោយច្បាស់លាស់ និងមានទំនុកចិត្ត។</p><div className="mt-5 flex gap-2"><a href="https://facebook.com" target="_blank" rel="noreferrer" data-testid="link-facebook" className="rounded-full border border-primary-foreground/20 p-2 hover:bg-primary-foreground/10"><Facebook className="h-4 w-4" /></a><a href="https://instagram.com" target="_blank" rel="noreferrer" data-testid="link-instagram" className="rounded-full border border-primary-foreground/20 p-2 hover:bg-primary-foreground/10"><Instagram className="h-4 w-4" /></a><a href="https://t.me" target="_blank" rel="noreferrer" data-testid="link-telegram" className="rounded-full border border-primary-foreground/20 p-2 hover:bg-primary-foreground/10"><Send className="h-4 w-4" /></a></div></div>
+      <div><Logo /><p className="mt-5 max-w-xs text-sm leading-7 text-primary-foreground/70">បណ្តាញការងារដែលជួយអ្នកស្វែងរកឱកាសពិតប្រាកដនៅកម្ពុជា ដោយច្បាស់លាស់ និងមានទំនុកចិត្ត។</p><div className="mt-5 flex gap-2">{socialLinks.map((social) => <a key={social.label} href={social.href} aria-label={social.label} target="_blank" rel="noreferrer" data-testid={social.testId} className="rounded-full border border-primary-foreground/20 p-2 hover:bg-primary-foreground/10">{social.icon}</a>)}</div></div>
       <div><h3 className="mb-4 text-sm font-bold text-accent">សម្រាប់អ្នកស្វែងរកការងារ</h3><div className="space-y-3 text-sm text-primary-foreground/70"><Link href="/jobs" data-testid="link-footer-jobs" className="block hover:text-primary-foreground">ស្វែងរកការងារ</Link><Link href="/companies" data-testid="link-footer-companies" className="block hover:text-primary-foreground">ក្រុមហ៊ុនកំពុងជ្រើសរើស</Link><Link href="/safety" data-testid="link-footer-safety" className="block hover:text-primary-foreground">ចំណុចសុវត្ថិភាព</Link></div></div>
-      <div><h3 className="mb-4 text-sm font-bold text-accent">ស្វែងយល់បន្ថែម</h3><div className="space-y-3 text-sm text-primary-foreground/70"><Link href="/about" className="block hover:text-primary-foreground">អំពី LY Haw</Link><Link href="/articles" className="block hover:text-primary-foreground">អត្ថបទ HR</Link><Link href="/faq" className="block hover:text-primary-foreground">សំណួរញឹកញាប់</Link></div></div>
-      <div><h3 className="mb-4 text-sm font-bold text-accent">ទំនាក់ទំនង</h3><div className="space-y-3 text-sm text-primary-foreground/70"><p className="flex gap-2"><Phone className="h-4 w-4 shrink-0" /> +855 12 345 678</p><p className="flex gap-2"><Mail className="h-4 w-4 shrink-0" /> hello@lyhaw.com</p><p className="flex gap-2"><MapPin className="h-4 w-4 shrink-0" /> ភ្នំពេញ ប្រទេសកម្ពុជា</p></div></div>
+      <div><h3 className="mb-4 text-sm font-bold text-accent">ស្វែងយល់បន្ថែម</h3><div className="space-y-3 text-sm text-primary-foreground/70"><Link href="/about" className="block hover:text-primary-foreground">អំពី LY Haw</Link><Link href="/articles" className="block hover:text-primary-foreground">អត្ថបទ HR</Link><Link href="/faq" className="block hover:text-primary-foreground">សំណួរញឹកញាប់</Link><Link href="/admin" className="block hover:text-primary-foreground">Staff Dashboard</Link></div></div>
+      <div><h3 className="mb-4 text-sm font-bold text-accent">ទំនាក់ទំនង</h3><div className="space-y-3 text-sm text-primary-foreground/70"><a href="tel:+85599885088" className="flex gap-2 hover:text-primary-foreground"><Phone className="h-4 w-4 shrink-0" /> +855 99 885 088</a><a href="mailto:lyhawhrsolution@gmail.com" className="flex gap-2 hover:text-primary-foreground"><Mail className="h-4 w-4 shrink-0" /> lyhawhrsolution@gmail.com</a><p className="flex gap-2"><MapPin className="h-4 w-4 shrink-0" /> ភ្នំពេញ ប្រទេសកម្ពុជា</p></div></div>
     </div>
-    <div className="border-t border-primary-foreground/10"><div className="container-wide flex flex-col justify-between gap-3 py-5 text-xs text-primary-foreground/55 sm:flex-row"><span>© 2024 LY Haw HR Solution. រក្សាសិទ្ធិគ្រប់យ៉ាង។</span><span><Link href="/privacy" className="mr-4 hover:text-primary-foreground">ឯកជនភាព</Link><Link href="/terms" className="hover:text-primary-foreground">លក្ខខណ្ឌ</Link></span></div></div>
+    <div className="border-t border-primary-foreground/10"><div className="container-wide flex flex-col justify-between gap-3 py-5 text-xs text-primary-foreground/55 sm:flex-row"><span>© 2026 LY Haw HR Solution. រក្សាសិទ្ធិគ្រប់យ៉ាង។</span><span><Link href="/privacy" className="mr-4 hover:text-primary-foreground">ឯកជនភាព</Link><Link href="/terms" className="hover:text-primary-foreground">លក្ខខណ្ឌ</Link></span></div></div>
   </footer>;
 }
 
-function Shell({ children }: { children: ReactNode }) { return <><Header />{children}<Footer /></>; }
+function Shell({ children }: { children: ReactNode }) { return <><Header />{children}<CVDropzone /><Footer /></>; }
 
 function SectionHeading({ eyebrow, title, href, linkLabel = 'មើលទាំងអស់' }: { eyebrow: string; title: string; href?: string; linkLabel?: string }) {
   return <div className="mb-8 flex items-end justify-between gap-4"><div><p className="mb-2 text-xs font-bold uppercase tracking-[.2em] text-accent">{eyebrow}</p><h2 className="display-title text-2xl font-extrabold text-primary sm:text-3xl">{title}</h2></div>{href && <Link href={href} data-testid={`link-section-${href.slice(1)}`} className="shrink-0 text-sm font-bold text-primary hover:text-accent">{linkLabel} <ArrowRight className="ml-1 inline h-4 w-4" /></Link>}</div>;
@@ -96,6 +111,42 @@ function SearchPanel({ compact = false }: { compact?: boolean }) {
     <label className="flex min-h-12 flex-1 items-center gap-3 rounded-xl px-3"><Search className="h-5 w-5 text-accent" /><input data-testid="input-search-jobs" value={value} onChange={(e) => setValue(e.target.value)} placeholder={copy.search} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" /></label>
     <button data-testid="button-submit-search" type="submit" className="min-h-12 rounded-xl bg-accent px-6 text-sm font-bold text-accent-foreground transition-transform hover:-translate-y-0.5">ស្វែងរកការងារ</button>
   </form>;
+}
+
+function CVDropzone() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+  const upload = useRequestUploadUrl();
+
+  const submitFile = async (selectedFile: File) => {
+    const extension = selectedFile.name.split('.').pop()?.toLowerCase();
+    const contentType = selectedFile.type || (extension === 'pdf' ? 'application/pdf' : extension === 'doc' ? 'application/msword' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    setFile(selectedFile);
+    setStatus('uploading');
+    setMessage('កំពុងបញ្ចូល CV...');
+    try {
+      const response = await upload.mutateAsync({ data: { name: selectedFile.name, size: selectedFile.size, contentType } });
+      const uploadResponse = await fetch(response.uploadURL, { method: 'PUT', headers: { 'Content-Type': contentType }, body: selectedFile });
+      if (!uploadResponse.ok) throw new Error('Upload failed');
+      setStatus('success');
+      setMessage('បានបញ្ចូល CV រួចរាល់។ ក្រុមការងារនឹងពិនិត្យព័ត៌មានរបស់អ្នក។');
+    } catch {
+      setStatus('error');
+      setMessage('មិនអាចបញ្ចូល CV បានទេ។ សូមព្យាយាមម្តងទៀត ឬផ្ញើតាម Email។');
+    }
+  };
+
+  const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragging(false);
+    const dropped = event.dataTransfer.files?.[0];
+    if (dropped) void submitFile(dropped);
+  };
+
+  return <section className="container-wide py-16"><div className="overflow-hidden rounded-3xl bg-primary p-7 text-primary-foreground shadow-md sm:p-10"><div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-accent">ចង់ចូលរួមជាមួយក្រុមហ៊ុនល្អ?</p><h2 className="mt-3 text-2xl font-extrabold sm:text-3xl">ទម្លាក់ CV របស់អ្នកនៅទីនេះ</h2><p className="mt-3 max-w-lg text-sm leading-7 text-primary-foreground/70">បញ្ចូល CV ជា PDF, DOC ឬ DOCX ទំហំមិនលើស 10MB។ ក្រុមការងារ LY Haw នឹងរក្សាទុក និងពិនិត្យឱកាសដែលសមនឹងអ្នក។</p><a href="mailto:lyhawhrsolution@gmail.com" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-accent"><Mail className="h-4 w-4" /> lyhawhrsolution@gmail.com</a></div><div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} onClick={() => inputRef.current?.click()} className={`cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? 'border-accent bg-accent/15' : 'border-primary-foreground/25 bg-primary-foreground/10 hover:border-accent/70'}`}><input ref={inputRef} type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="hidden" onChange={(event) => { const selected = event.target.files?.[0]; if (selected) void submitFile(selected); }} /><div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-accent text-accent-foreground"><ArrowRight className="h-6 w-6 rotate-90" /></div><p className="mt-4 font-bold">{file ? file.name : 'ទម្លាក់ CV នៅទីនេះ ឬចុចដើម្បីជ្រើសរើស'}</p><p className={`mt-2 text-xs ${status === 'error' ? 'text-red-200' : status === 'success' ? 'text-emerald-200' : 'text-primary-foreground/60'}`}>{message || 'PDF, DOC, DOCX · រហូតដល់ 10MB'}</p></div></div></div></section>;
 }
 
 function JobCard({ job, featured = false }: { job: Job; featured?: boolean }) {
@@ -224,13 +275,18 @@ function InfoPage({ kind }: { kind: 'about' | 'contact' | 'faq' | 'privacy' | 't
   return <Shell><main className="container-wide section-space"><div className="mx-auto max-w-3xl"><p className="mb-4 text-xs font-bold uppercase tracking-[.2em] text-accent">{content.eyebrow}</p><h1 className="display-title text-4xl font-extrabold leading-tight text-primary sm:text-6xl">{content.title}</h1><p className="mt-7 text-lg leading-8 text-muted-foreground">{content.intro}</p><div className="mt-12 space-y-8">{kind === 'contact' ? <div className="grid gap-4 sm:grid-cols-3"><ContactCard icon={<Phone />} title="ទូរស័ព្ទ" value="+855 12 345 678" /><ContactCard icon={<Mail />} title="អ៊ីមែល" value="hello@lyhaw.com" /><ContactCard icon={<MapPin />} title="ទីតាំង" value="ភ្នំពេញ ប្រទេសកម្ពុជា" /></div> : kind === 'faq' ? <div className="space-y-3">{['តើការដាក់ពាក្យមានការគិតថ្លៃទេ?', 'តើខ្ញុំអាចដាក់ពាក្យតាមវិធីណា?', 'តើខ្ញុំអាចពិនិត្យសុវត្ថិភាពការងារបានដូចម្តេច?'].map((q, i) => <details key={q} open={i === 0} className="rounded-2xl border border-border bg-card p-5"><summary data-testid={`faq-question-${i}`} className="cursor-pointer font-bold text-primary">{q}</summary><p className="mt-3 text-sm leading-7 text-muted-foreground">{i === 0 ? 'ទេ។ LY Haw មិនដែលទាមទារថ្លៃសេវាពីអ្នកស្វែងរកការងារ។' : 'អ្នកអាចប្រើព័ត៌មាន Email ទូរស័ព្ទ ឬ Telegram ដែលមាននៅក្នុងទំព័រការងារ។'}</p></details>)}</div> : <div className="rounded-3xl bg-[#eef2ed] p-7 sm:p-10"><ShieldCheck className="h-9 w-9 text-accent" /><h2 className="mt-5 text-2xl font-extrabold text-primary">{kind === 'safety' ? 'ចំណុចសំខាន់ៗដែលត្រូវចងចាំ' : 'គោលការណ៍របស់យើង'}</h2><ul className="mt-5 space-y-4 text-sm leading-7 text-muted-foreground"><li className="flex gap-3"><CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-accent" /> ព័ត៌មានការងារត្រូវបានបង្ហាញឲ្យច្បាស់ និងងាយពិនិត្យ។</li><li className="flex gap-3"><CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-accent" /> កុំផ្ញើប្រាក់ ឬឯកសារសម្ងាត់ទៅកាន់ប្រភពដែលមិនអាចផ្ទៀងផ្ទាត់បាន។</li><li className="flex gap-3"><CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-accent" /> ប្រសិនបើសង្ស័យ សូមទាក់ទងក្រុមការងារ LY Haw ដោយផ្ទាល់។</li></ul></div>}</div></div></main></Shell>;
 }
 
-function ContactCard({ icon, title, value }: { icon: ReactNode; title: string; value: string }) { return <div className="rounded-2xl border border-border bg-card p-5"><span className="text-accent">{icon}</span><h3 className="mt-4 text-sm font-bold text-primary">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{value}</p></div>; }
+function ContactCard({ icon, title, value }: { icon: ReactNode; title: string; value: string }) {
+  const displayValue = title === 'ទូរស័ព្ទ' ? '+855 99 885 088' : title === 'អ៊ីមែល' ? 'lyhawhrsolution@gmail.com' : value;
+  return <div className="rounded-2xl border border-border bg-card p-5"><span className="text-accent">{icon}</span><h3 className="mt-4 text-sm font-bold text-primary">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{displayValue}</p></div>;
+}
 
 function AdminPage() {
-  const query = useGetDashboard();
-  const data = query.data as DashboardSummary | undefined;
+  const dashboardQuery = useGetDashboard();
+  const jobsQuery = useListJobs({ limit: 24, sort: 'newest' });
+  const data = dashboardQuery.data as DashboardSummary | undefined;
+  const jobs = jobsQuery.data?.data || [];
   const metrics = data ? [['ការងារសរុប', data.totalJobs], ['កំពុងផ្សព្វផ្សាយ', data.publishedJobs], ['ការងារពិសេស', data.featuredJobs], ['បន្ទាន់', data.urgentJobs], ['ជិតផុតកំណត់', data.closingSoon], ['ក្រុមហ៊ុន', data.companies]] : [];
-  return <div className="min-h-dvh bg-[#eef2ed]"><div className="border-b border-border bg-primary text-primary-foreground"><div className="container-wide flex h-20 items-center justify-between"><Logo /><span className="rounded-full border border-primary-foreground/20 px-3 py-1 text-xs font-bold">STAFF DASHBOARD</span></div></div><main className="container-wide py-12"><div className="mb-8"><p className="text-xs font-bold uppercase tracking-[.2em] text-accent">ផ្ទៃការងារក្រុមការងារ</p><h1 className="mt-2 text-3xl font-extrabold text-primary">សង្ខេបការជ្រើសរើសបុគ្គលិក</h1><p className="mt-2 text-sm text-muted-foreground">ទិដ្ឋភាពរួមសម្រាប់ក្រុម LY Haw HR Solution។</p></div>{query.isLoading ? <LoadingCards count={2} /> : query.isError ? <QueryError /> : <><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{metrics.map(([label, value]) => <div key={String(label)} data-testid={`metric-${label}`} className="rounded-2xl border border-border bg-card p-5"><p className="text-sm text-muted-foreground">{label}</p><strong className="mt-2 block text-3xl font-extrabold text-primary">{value}</strong></div>)}</div><div className="mt-8 grid gap-5 lg:grid-cols-2"><div className="rounded-2xl border border-border bg-card p-6"><h2 className="font-bold text-primary">ស្ថានភាពបន្ថែម</h2><div className="mt-5 grid grid-cols-2 gap-4 text-sm"><p className="text-muted-foreground">ព្រាង <strong className="ml-2 text-primary">{data?.draftJobs}</strong></p><p className="text-muted-foreground">បានកំណត់ពេល <strong className="ml-2 text-primary">{data?.scheduledJobs}</strong></p><p className="text-muted-foreground">បិទ <strong className="ml-2 text-primary">{data?.closedJobs}</strong></p><p className="text-muted-foreground">ផុតកំណត់ <strong className="ml-2 text-primary">{data?.expiredJobs}</strong></p></div></div><div className="rounded-2xl border border-border bg-card p-6"><h2 className="font-bold text-primary">ចំណុចចូលរហ័ស</h2><div className="mt-5 flex flex-wrap gap-3"><Link href="/jobs" data-testid="link-admin-public-jobs" className="rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">មើលការងារសាធារណៈ</Link><Link href="/companies" data-testid="link-admin-public-companies" className="rounded-xl border border-border px-4 py-2.5 text-sm font-bold text-primary">ក្រុមហ៊ុន</Link></div></div></div></>}</main></div>;
+  return <div className="min-h-dvh bg-[#eef2ed]"><div className="border-b border-border bg-primary text-primary-foreground"><div className="container-wide flex h-20 items-center justify-between"><Logo /><span className="rounded-full border border-primary-foreground/20 px-3 py-1 text-xs font-bold">STAFF DASHBOARD</span></div></div><main className="container-wide py-12"><div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-accent">ផ្ទៃការងារក្រុមការងារ</p><h1 className="mt-2 text-3xl font-extrabold text-primary">សង្ខេបការជ្រើសរើសបុគ្គលិក</h1><p className="mt-2 text-sm text-muted-foreground">ទិដ្ឋភាពរួមសម្រាប់ក្រុម LY Haw HR Solution។</p></div><Link href="/jobs" className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-foreground">មើលទំព័រសាធារណៈ <ArrowRight className="h-4 w-4" /></Link></div>{dashboardQuery.isLoading ? <LoadingCards count={2} /> : dashboardQuery.isError ? <QueryError /> : <><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{metrics.map(([label, value]) => <div key={String(label)} data-testid={`metric-${label}`} className="rounded-2xl border border-border bg-card p-5"><p className="text-sm text-muted-foreground">{label}</p><strong className="mt-2 block text-3xl font-extrabold text-primary">{value}</strong></div>)}</div><div className="mt-8 grid gap-5 lg:grid-cols-[1.3fr_.7fr]"><div className="rounded-2xl border border-border bg-card p-6"><div className="flex items-center justify-between gap-3"><div><h2 className="font-bold text-primary">មុខតំណែងថ្មីៗ</h2><p className="mt-1 text-xs text-muted-foreground">បង្ហាញ {jobs.length} ក្នុងចំណោម {jobsQuery.data?.meta.total || data?.publishedJobs || 0} មុខតំណែង</p></div><Link href="/jobs" className="text-xs font-bold text-accent">មើលទាំងអស់</Link></div>{jobsQuery.isLoading ? <div className="mt-5"><LoadingCards count={3} /></div> : <div className="mt-5 divide-y divide-border">{jobs.slice(0, 10).map((job) => <div key={job.id} className="flex items-center justify-between gap-4 py-3"><div className="min-w-0"><p className="truncate text-sm font-bold text-primary">{job.titleKhmer || job.titleEnglish}</p><p className="mt-1 truncate text-xs text-muted-foreground">{job.company.name} · {job.location}</p></div><Link href={`/jobs/${job.slug}`} className="shrink-0 rounded-lg border border-border px-2.5 py-1.5 text-xs font-bold text-primary">មើល</Link></div>)}</div>}</div><div className="space-y-5"><div className="rounded-2xl border border-border bg-card p-6"><h2 className="font-bold text-primary">ស្ថានភាពបន្ថែម</h2><div className="mt-5 grid grid-cols-2 gap-4 text-sm"><p className="text-muted-foreground">ព្រាង <strong className="ml-2 text-primary">{data?.draftJobs}</strong></p><p className="text-muted-foreground">កំណត់ពេល <strong className="ml-2 text-primary">{data?.scheduledJobs}</strong></p><p className="text-muted-foreground">បិទ <strong className="ml-2 text-primary">{data?.closedJobs}</strong></p><p className="text-muted-foreground">ផុតកំណត់ <strong className="ml-2 text-primary">{data?.expiredJobs}</strong></p></div></div><div className="rounded-2xl border border-border bg-card p-6"><h2 className="font-bold text-primary">ទំនាក់ទំនងក្រុមហ៊ុន</h2><div className="mt-4 space-y-3 text-sm text-muted-foreground"><a href="mailto:lyhawhrsolution@gmail.com" className="flex items-center gap-2 hover:text-primary"><Mail className="h-4 w-4 text-accent" /> lyhawhrsolution@gmail.com</a><a href="tel:+85599885088" className="flex items-center gap-2 hover:text-primary"><Phone className="h-4 w-4 text-accent" /> +855 99 885 088</a><a href="https://t.me/lyhawhrsolution" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary"><Send className="h-4 w-4 text-accent" /> Telegram</a></div></div></div></div></>}</main></div>;
 }
 
 function Router() {

@@ -907,6 +907,88 @@ const positionSeeds: PositionSeed[] = [
   },
 ];
 
+const makePositionSeed = (
+  titleKhmer: string,
+  titleEnglish: string,
+  category: string,
+  companyIndex: number,
+  location: string,
+  salary: string,
+  experience: string,
+  summary: string,
+  skills: string[],
+  workArrangement = "On-site",
+  education = "Bachelor's degree",
+): PositionSeed => ({
+  titleKhmer,
+  titleEnglish,
+  category,
+  companyIndex,
+  location,
+  jobType: "Full-time",
+  workArrangement,
+  salary,
+  experience,
+  education,
+  summary,
+  skills,
+});
+
+const morePositionSeeds: PositionSeed[] = [
+  makePositionSeed("អ្នកគ្រប់គ្រងហាងជាន់ខ្ពស់", "Store Supervisor", "Retail & Operations", 0, "Phnom Penh", "$500 - $750", "2+ years", "Support a high-performing store team and keep every shift organized.", ["Retail operations", "Team leadership", "Customer care"]),
+  makePositionSeed("បុគ្គលិកលក់រាយ", "Retail Sales Associate", "Sales & Marketing", 0, "Phnom Penh", "$400 - $600", "1+ year", "Help customers choose confidently through friendly, useful service.", ["Sales", "Customer care", "Product knowledge"]),
+  makePositionSeed("អ្នកត្រួតពិនិត្យស្តុក", "Inventory Controller", "Supply Chain", 0, "Phnom Penh", "$550 - $800", "2+ years", "Keep stock records accurate and help the team reduce avoidable losses.", ["Inventory", "Excel", "Stock control"]),
+  makePositionSeed("អ្នកសម្របសម្រួលដឹកជញ្ជូន", "Logistics Coordinator", "Supply Chain", 0, "Phnom Penh", "$550 - $850", "2+ years", "Coordinate reliable deliveries from supplier to store and customer.", ["Logistics", "Scheduling", "Communication"]),
+  makePositionSeed("មន្ត្រីម៉ាកយីហោ", "Brand Executive", "Sales & Marketing", 0, "Phnom Penh", "$600 - $900", "2+ years", "Help build a consistent, recognizable retail brand across every channel.", ["Brand planning", "Campaigns", "Presentation"], "Hybrid"),
+  makePositionSeed("មន្ត្រីរដ្ឋបាលផ្នែកលក់", "Sales Admin Officer", "Administration", 0, "Phnom Penh", "$450 - $700", "1+ year", "Give the sales team accurate information and dependable daily support.", ["Reporting", "Administration", "Excel"]),
+  makePositionSeed("អ្នកដឹកនាំរៀបចំហាង", "Visual Merchandising Lead", "Creative & Design", 0, "Phnom Penh", "$650 - $950", "3+ years", "Create store displays that make products easy and appealing to discover.", ["Visual merchandising", "Retail design", "Planning"]),
+  makePositionSeed("អ្នកដឹកនាំបទពិសោធន៍អតិថិជន", "Customer Experience Lead", "Customer Service", 0, "Phnom Penh", "$650 - $950", "3+ years", "Improve customer journeys and coach teams to deliver thoughtful service.", ["Customer experience", "Coaching", "Service design"], "Hybrid"),
+  makePositionSeed("អ្នកសម្របសម្រួលបណ្តុះបណ្តាល", "Training Coordinator", "Human Resources", 0, "Phnom Penh", "$500 - $800", "1 - 2 years", "Coordinate practical learning programs that help retail teams grow.", ["Training", "Scheduling", "Communication"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងលក់តំបន់", "Area Sales Manager", "Sales & Marketing", 0, "Siem Reap", "$800 - $1,200", "4+ years", "Lead sales performance across stores and build strong local partnerships.", ["Sales leadership", "KPI management", "Coaching"]),
+  makePositionSeed("អ្នកជំនាញជំនួយផលិតផល", "Product Support Specialist", "Customer Service", 1, "Phnom Penh", "$650 - $1,000", "2+ years", "Help customers solve product questions with clarity and empathy.", ["Customer support", "Troubleshooting", "Documentation"], "Hybrid"),
+  makePositionSeed("អ្នកអភិវឌ្ឍន៍ Full Stack", "Full Stack Developer", "Information Technology", 1, "Phnom Penh", "$1,100 - $1,800", "3+ years", "Build reliable product features from interface to service layer.", ["React", "Node.js", "PostgreSQL"], "Hybrid", "Computer Science or equivalent"),
+  makePositionSeed("អ្នកស្រាវជ្រាវ UX", "UX Researcher", "Creative & Design", 1, "Phnom Penh", "$800 - $1,300", "2+ years", "Turn customer conversations into product decisions the team can act on.", ["User research", "Interviews", "Synthesis"], "Hybrid", "Design, Psychology, or related field"),
+  makePositionSeed("វិស្វករកម្មវិធី", "Software Engineer", "Information Technology", 1, "Phnom Penh", "$1,000 - $1,700", "2+ years", "Ship dependable software with a team that values thoughtful engineering.", ["Software development", "Testing", "Git"], "Hybrid", "Computer Science or equivalent"),
+  makePositionSeed("អ្នកវិភាគសុវត្ថិភាពប្រព័ន្ធ", "Security Analyst", "Information Technology", 1, "Phnom Penh", "$900 - $1,500", "3+ years", "Help protect customer data and strengthen everyday security practices.", ["Security monitoring", "Risk analysis", "Incident response"], "Hybrid", "Computer Science or equivalent"),
+  makePositionSeed("អ្នកគ្រប់គ្រងមូលដ្ឋានទិន្នន័យ", "Database Administrator", "Information Technology", 1, "Phnom Penh", "$1,000 - $1,600", "3+ years", "Keep data systems healthy, available, and ready for responsible growth.", ["PostgreSQL", "Backups", "Performance"], "Hybrid", "Computer Science or equivalent"),
+  makePositionSeed("អ្នកគ្រប់គ្រងគម្រោងបច្ចេកវិទ្យា", "Technical Project Manager", "Operations", 1, "Phnom Penh", "$1,000 - $1,600", "4+ years", "Help technical teams deliver valuable work with calm, clear coordination.", ["Project management", "Agile", "Stakeholders"], "Hybrid"),
+  makePositionSeed("អ្នកវិភាគអាជីវកម្ម", "Business Analyst", "Operations", 1, "Phnom Penh", "$800 - $1,300", "2+ years", "Clarify business needs and turn them into practical product improvements.", ["Requirements", "Process mapping", "Analysis"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងទីផ្សារផលិតផល", "Product Marketing Manager", "Sales & Marketing", 1, "Phnom Penh", "$900 - $1,500", "4+ years", "Connect product value with the businesses and people it serves.", ["Go-to-market", "Messaging", "Research"], "Hybrid"),
+  makePositionSeed("មន្ត្រីដៃគូអាជីវកម្ម", "Partnership Executive", "Sales & Marketing", 1, "Phnom Penh", "$650 - $1,050", "2+ years", "Build partnerships that make digital tools more useful for local businesses.", ["Partnerships", "Negotiation", "Communication"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងគណនីអតិថិជន", "Account Manager", "Customer Service", 1, "Phnom Penh", "$700 - $1,100", "2+ years", "Help customers reach their goals through responsive account partnership.", ["Account management", "Onboarding", "Communication"], "Hybrid"),
+  makePositionSeed("មន្ត្រីលក់ក្នុងការិយាល័យ", "Inside Sales Executive", "Sales & Marketing", 1, "Phnom Penh", "$600 - $1,000", "1+ year", "Start useful conversations and guide prospects toward the right solution.", ["Prospecting", "Presentations", "CRM"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងសហគមន៍", "Community Manager", "Sales & Marketing", 1, "Phnom Penh", "$550 - $900", "2+ years", "Create a welcoming community around products that help people work better.", ["Community", "Content", "Events"], "Remote-friendly"),
+  makePositionSeed("អ្នករចនាចលនា", "Motion Designer", "Creative & Design", 1, "Phnom Penh", "$700 - $1,100", "2+ years", "Bring product stories to life with clear, engaging motion.", ["After Effects", "Storyboarding", "Visual design"], "Hybrid", "Design or related field"),
+  makePositionSeed("អ្នកកាត់តវីដេអូ", "Video Editor", "Creative & Design", 1, "Phnom Penh", "$600 - $950", "2+ years", "Shape useful stories into polished video content for modern audiences.", ["Premiere Pro", "Editing", "Storytelling"], "Hybrid", "Design or related field"),
+  makePositionSeed("អ្នកជំនាញ SEO", "SEO Specialist", "Sales & Marketing", 1, "Phnom Penh", "$600 - $1,000", "2+ years", "Help people discover helpful products and content through search.", ["SEO", "Analytics", "Content strategy"], "Remote-friendly"),
+  makePositionSeed("អ្នកវិភាគហិរញ្ញវត្ថុ", "Financial Analyst", "Finance & Accounting", 1, "Phnom Penh", "$800 - $1,300", "2+ years", "Turn financial information into clear decisions for a growing business.", ["Financial modeling", "Excel", "Reporting"], "Hybrid"),
+  makePositionSeed("មន្ត្រីគណនេយ្យចំណាយ", "Accounts Payable Officer", "Finance & Accounting", 1, "Phnom Penh", "$550 - $850", "1+ year", "Keep invoices, approvals, and supplier payments accurate and timely.", ["Accounts payable", "Reconciliation", "Excel"]),
+  makePositionSeed("គណនេយ្យករចំណូល", "Revenue Accountant", "Finance & Accounting", 1, "Phnom Penh", "$650 - $1,000", "2+ years", "Protect the accuracy of revenue records and monthly reporting.", ["Revenue accounting", "Reconciliation", "Reporting"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងការិយាល័យ", "Office Manager", "Administration", 1, "Phnom Penh", "$650 - $1,000", "3+ years", "Create an organized, welcoming office that helps every team do good work.", ["Office operations", "Vendors", "Organization"]),
+  makePositionSeed("អ្នកជំនាញប្រតិបត្តិការបុគ្គលិក", "People Operations Specialist", "Human Resources", 1, "Phnom Penh", "$700 - $1,100", "2+ years", "Support a healthy employee experience through thoughtful people operations.", ["People operations", "HR systems", "Communication"], "Hybrid"),
+  makePositionSeed("អ្នកជំនាញស្វែងរកបុគ្គលិក", "Talent Acquisition Specialist", "Human Resources", 1, "Phnom Penh", "$700 - $1,100", "2+ years", "Find and connect with people who can help the team grow responsibly.", ["Sourcing", "Interviewing", "Candidate care"], "Hybrid"),
+  makePositionSeed("អ្នកជំនាញអភិវឌ្ឍការរៀន", "Learning & Development Specialist", "Human Resources", 1, "Phnom Penh", "$700 - $1,100", "3+ years", "Build learning programs that help people grow with confidence.", ["Learning design", "Facilitation", "People development"], "Hybrid"),
+  makePositionSeed("មន្ត្រីប្រាក់ខែ និងអត្ថប្រយោជន៍", "Compensation & Benefits Officer", "Human Resources", 1, "Phnom Penh", "$650 - $1,000", "2+ years", "Support fair, accurate, and trusted compensation operations.", ["Payroll", "Benefits", "Confidentiality"], "Hybrid"),
+  makePositionSeed("មន្ត្រីទំនាក់ទំនងបុគ្គលិក", "Employee Relations Officer", "Human Resources", 1, "Phnom Penh", "$650 - $1,000", "2+ years", "Help create respectful workplace conversations and consistent people practices.", ["Employee relations", "Communication", "HR policy"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងលក់សណ្ឋាគារ", "Hotel Sales Manager", "Hospitality & Tourism", 2, "Siem Reap", "$800 - $1,300", "4+ years", "Grow hotel partnerships while keeping the guest promise at the center.", ["Hotel sales", "Partnerships", "Revenue"], "Hybrid", "Hospitality or related field"),
+  makePositionSeed("មន្ត្រីទទួលភ្ញៀវ", "Front Desk Agent", "Hospitality & Tourism", 2, "Siem Reap", "$400 - $600", "1+ year", "Welcome guests with warmth, accuracy, and confident local knowledge.", ["Guest service", "English", "Opera PMS"], "On-site", "Hospitality or related field"),
+  makePositionSeed("មន្ត្រីវេនយប់", "Night Auditor", "Hospitality & Tourism", 2, "Siem Reap", "$450 - $650", "1+ year", "Keep overnight hotel operations calm, accurate, and guest-ready.", ["Night audit", "PMS", "Attention to detail"], "On-site", "Hospitality or related field"),
+  makePositionSeed("អ្នកគ្រប់គ្រងសេវាម្ហូបអាហារ", "Food & Beverage Supervisor", "Hospitality & Tourism", 2, "Siem Reap", "$500 - $750", "2+ years", "Guide a service team that makes every meal feel considered and welcoming.", ["F&B operations", "Service standards", "Team leadership"], "On-site", "Hospitality or related field"),
+  makePositionSeed("ចុងភៅរង", "Sous Chef", "Hospitality & Tourism", 2, "Siem Reap", "$650 - $950", "3+ years", "Support a disciplined kitchen team with consistent quality and local flavor.", ["Kitchen operations", "Food safety", "Team leadership"], "On-site", "Culinary training"),
+  makePositionSeed("ចុងភៅនំ", "Pastry Chef", "Hospitality & Tourism", 2, "Siem Reap", "$550 - $850", "2+ years", "Create thoughtful pastries and desserts that guests remember.", ["Pastry", "Food safety", "Creativity"], "On-site", "Culinary training"),
+  makePositionSeed("មន្ត្រីទទួលភ្ញៀវស្ប៉ា", "Spa Receptionist", "Hospitality & Tourism", 2, "Siem Reap", "$400 - $600", "1+ year", "Make every spa booking and arrival feel calm, clear, and personal.", ["Guest service", "Reservations", "English"], "On-site", "Hospitality or related field"),
+  makePositionSeed("អ្នកសម្របសម្រួលទេសចរណ៍", "Tour Coordinator", "Hospitality & Tourism", 2, "Siem Reap", "$500 - $800", "2+ years", "Coordinate memorable local experiences with care and dependable detail.", ["Tour planning", "Supplier coordination", "English"], "On-site", "Hospitality or related field"),
+  makePositionSeed("អ្នកទទួលបន្ទុកជួយភ្ញៀវ", "Concierge", "Hospitality & Tourism", 2, "Siem Reap", "$450 - $700", "1+ year", "Help guests discover the best of Siem Reap with thoughtful recommendations.", ["Guest relations", "Local knowledge", "English"], "On-site", "Hospitality or related field"),
+  makePositionSeed("អ្នកគ្រប់គ្រងថែទាំអគារ", "Maintenance Supervisor", "Hospitality & Tourism", 2, "Siem Reap", "$550 - $850", "3+ years", "Keep hotel facilities safe, comfortable, and ready for every guest.", ["Facilities", "Preventive maintenance", "Team leadership"], "On-site", "Technical or related field"),
+  makePositionSeed("អ្នកគ្រប់គ្រងចំណូលសណ្ឋាគារ", "Revenue Manager", "Hospitality & Tourism", 2, "Siem Reap", "$900 - $1,400", "4+ years", "Balance demand, pricing, and guest value across the hotel business.", ["Revenue management", "Forecasting", "Analytics"], "Hybrid", "Hospitality, Business, or related field"),
+  makePositionSeed("អ្នកគ្រប់គ្រងទីផ្សារឌីជីថល", "Digital Marketing Manager", "Sales & Marketing", 2, "Siem Reap", "$700 - $1,100", "3+ years", "Tell the hotel story to the right guests across digital channels.", ["Digital campaigns", "Content", "Analytics"], "Hybrid", "Marketing or Communications degree"),
+  makePositionSeed("អ្នកសម្របសម្រួលទិញទំនិញ", "Purchasing Coordinator", "Supply Chain", 2, "Siem Reap", "$500 - $800", "2+ years", "Keep hotel purchasing organized, transparent, and ready for service.", ["Purchasing", "Suppliers", "Inventory"], "On-site", "Business or related field"),
+  makePositionSeed("មន្ត្រីសន្តិសុខសណ្ឋាគារ", "Security Officer", "Hospitality & Tourism", 2, "Siem Reap", "$400 - $600", "1+ year", "Help protect a welcoming hotel environment for guests and teammates.", ["Safety", "Incident reporting", "Observation"], "On-site", "High school or higher"),
+  makePositionSeed("អ្នកគ្រប់គ្រងបទពិសោធន៍ភ្ញៀវ", "Guest Experience Manager", "Hospitality & Tourism", 2, "Siem Reap", "$700 - $1,100", "3+ years", "Turn guest feedback into service improvements people can feel.", ["Guest experience", "Service recovery", "Coaching"], "On-site", "Hospitality or related field"),
+];
+
+positionSeeds.push(...morePositionSeeds);
+
 const additionalJobs: Job[] = positionSeeds.map((seed, index) => {
   const company = companies[seed.companyIndex];
   const jobNumber = index + 5;
@@ -968,6 +1050,11 @@ const additionalJobs: Job[] = positionSeeds.map((seed, index) => {
 });
 
 jobs.push(...additionalJobs);
+for (const job of jobs) {
+  job.applicationEmail = "lyhawhrsolution@gmail.com";
+  job.applicationPhone = "+855 99 885 088";
+  job.telegram = "https://t.me/lyhawhrsolution";
+}
 
 const articles: ArticleDetail[] = [
   {
@@ -1016,7 +1103,7 @@ export const recruitmentJobs = jobs;
 export const recruitmentArticles = articles;
 
 export const dashboardSummary: DashboardSummary = {
-  totalJobs: jobs.length + 5,
+  totalJobs: jobs.length,
   draftJobs: 5,
   scheduledJobs: 1,
   publishedJobs: jobs.length,
