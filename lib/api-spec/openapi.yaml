@@ -64,7 +64,7 @@ paths:
           schema:
             type: integer
             minimum: 1
-            maximum: 24
+            maximum: 200
             default: 12
       responses:
         "200":
@@ -370,6 +370,7 @@ components:
         publishedAt: { type: string, format: date }
         readTime: { type: string }
         image: { type: string }
+        author: { type: string }
     ArticleDetail:
       allOf:
         - $ref: "#/components/schemas/Article"
@@ -416,4 +417,3 @@ components:
       required: [error]
       properties:
         error: { type: string }
-

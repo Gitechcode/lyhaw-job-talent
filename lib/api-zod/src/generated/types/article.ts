@@ -15,4 +15,5 @@ export interface Article {
   publishedAt: Date;
   readTime: string;
   image: string;
+  author?: string;
 }

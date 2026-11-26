@@ -102,6 +102,7 @@ export interface Article {
   publishedAt: string;
   readTime: string;
   image: string;
+  author?: string;
 }
 
 export type ArticleDetail = Article & {
@@ -171,7 +172,7 @@ sort?: ListJobsSort;
 page?: number;
 /**
  * @minimum 1
- * @maximum 24
+ * @maximum 200
  */
 limit?: number;
 };

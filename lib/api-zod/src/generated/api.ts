@@ -24,7 +24,7 @@ export const listJobsQuerySortDefault = `newest`;
 export const listJobsQueryPageDefault = 1;
 
 export const listJobsQueryLimitDefault = 12;
-export const listJobsQueryLimitMax = 24;
+export const listJobsQueryLimitMax = 200;
 
 
 
@@ -256,7 +256,8 @@ export const ListArticlesResponseItem = zod.object({
   "category": zod.string(),
   "publishedAt": zod.coerce.date(),
   "readTime": zod.string(),
-  "image": zod.string()
+  "image": zod.string(),
+  "author": zod.string().optional()
 })
 export const ListArticlesResponse = zod.array(ListArticlesResponseItem)
 
@@ -276,7 +277,8 @@ export const GetArticleResponse = zod.object({
   "category": zod.string(),
   "publishedAt": zod.coerce.date(),
   "readTime": zod.string(),
-  "image": zod.string()
+  "image": zod.string(),
+  "author": zod.string().optional()
 }).and(zod.object({
   "body": zod.string()
 }))

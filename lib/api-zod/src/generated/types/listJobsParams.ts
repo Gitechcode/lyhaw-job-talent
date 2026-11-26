@@ -29,7 +29,7 @@ sort?: ListJobsSort;
 page?: number;
 /**
  * @minimum 1
- * @maximum 24
+ * @maximum 200
  */
 limit?: number;
 };

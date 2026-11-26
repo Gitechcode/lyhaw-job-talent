@@ -6,8 +6,20 @@ import type {
   DashboardSummary,
   Job,
 } from "@workspace/api-zod";
+import fs from "node:fs";
+import path from "node:path";
 
-const companies: Company[] = [
+// ── Utility helpers ────────────────────────────────────────────────────────
+export function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+export function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+// ── Mutable data arrays ────────────────────────────────────────────────────
+let companies: Company[] = [
   {
     id: "company-001",
     name: "Mekong Retail Group",
@@ -44,6 +56,66 @@ const companies: Company[] = [
       "A hospitality team focused on warm service, local culture, and memorable stays.",
     website: null,
   },
+  {
+    id: "company-004",
+    name: "Angkor Financial Services",
+    slug: "angkor-financial-services",
+    industry: "Banking & Finance",
+    location: "Phnom Penh",
+    verified: true,
+    logo: "",
+    description:
+      "Leading microfinance and banking institution empowering local communities and SMEs across Cambodia.",
+    website: null,
+  },
+  {
+    id: "company-005",
+    name: "Bayon Logistics & Freight",
+    slug: "bayon-logistics-freight",
+    industry: "Supply Chain & Logistics",
+    location: "Sihanoukville",
+    verified: true,
+    logo: "",
+    description:
+      "Full-service supply chain and port logistics provider connecting Cambodia with regional maritime routes.",
+    website: null,
+  },
+  {
+    id: "company-006",
+    name: "Kirirom Media & Tech",
+    slug: "kirirom-media-tech",
+    industry: "Marketing & Creative",
+    location: "Phnom Penh",
+    verified: true,
+    logo: "",
+    description:
+      "Creative agency and digital production powerhouse delivering impactful branding and content.",
+    website: null,
+  },
+  {
+    id: "company-007",
+    name: "Battambang Agri-Food",
+    slug: "battambang-agri-food",
+    industry: "Agriculture & Manufacturing",
+    location: "Battambang",
+    verified: true,
+    logo: "",
+    description:
+      "Modern sustainable food processing and agricultural export corporation.",
+    website: null,
+  },
+  {
+    id: "company-008",
+    name: "Kampot Eco Resorts",
+    slug: "kampot-eco-resorts",
+    industry: "Tourism & Leisure",
+    location: "Kampot",
+    verified: true,
+    logo: "",
+    description:
+      "Eco-friendly riverfront resorts combining sustainable tourism with high-end hospitality.",
+    website: null,
+  },
 ];
 
 const media = (type: "cover" | "poster" | "gallery", alt: string) => ({
@@ -53,7 +125,7 @@ const media = (type: "cover" | "poster" | "gallery", alt: string) => ({
   caption: null,
 });
 
-const jobs: Job[] = [
+let jobs: Job[] = [
   {
     id: "job-001",
     reference: "LYH-2601",
@@ -987,20 +1059,59 @@ const morePositionSeeds: PositionSeed[] = [
   makePositionSeed("អ្នកគ្រប់គ្រងបទពិសោធន៍ភ្ញៀវ", "Guest Experience Manager", "Hospitality & Tourism", 2, "Siem Reap", "$700 - $1,100", "3+ years", "Turn guest feedback into service improvements people can feel.", ["Guest experience", "Service recovery", "Coaching"], "On-site", "Hospitality or related field"),
 ];
 
-positionSeeds.push(...morePositionSeeds);
+const extraDiverseSeeds: PositionSeed[] = [
+  // Banking & Finance (Company 3 - Angkor Financial Services)
+  makePositionSeed("មន្ត្រីឥណទានជាន់ខ្ពស់", "Senior Credit Officer", "Banking & Finance", 3, "Phnom Penh", "$600 - $950", "2+ years", "Evaluate SME loan portfolios and build trusted borrower partnerships.", ["Credit assessment", "Risk analysis", "Customer relations"], "On-site"),
+  makePositionSeed("អ្នកវិភាគហិរញ្ញវត្ថុ", "Financial Analyst", "Banking & Finance", 3, "Phnom Penh", "$800 - $1,300", "3+ years", "Model financial projections and support strategic investment planning.", ["Financial modeling", "Excel", "Forecasting"], "Hybrid"),
+  makePositionSeed("ប្រធានសាខាធនាគារ", "Branch Manager", "Banking & Finance", 3, "Battambang", "$1,000 - $1,800", "5+ years", "Drive overall branch operations, service excellence, and commercial growth.", ["Branch leadership", "Operations", "Compliance"], "On-site"),
+  makePositionSeed("មន្ត្រីគ្រប់គ្រងហានិភ័យ", "Risk Management Officer", "Banking & Finance", 3, "Phnom Penh", "$750 - $1,200", "3+ years", "Identify and monitor operational and financial credit risks.", ["Risk management", "Regulatory compliance", "Internal audit"], "Hybrid"),
+  makePositionSeed("មន្ត្រីគណនេយ្យទូទៅ", "General Accountant", "Banking & Finance", 3, "Phnom Penh", "$500 - $800", "2+ years", "Manage general ledger, reconciliations, and monthly financial reporting.", ["Accounting", "Tax reporting", "QuickBooks"], "On-site"),
+  makePositionSeed("មន្ត្រីផ្នែកសវនកម្មផ្ទៃក្នុង", "Internal Auditor", "Banking & Finance", 3, "Phnom Penh", "$700 - $1,100", "2+ years", "Review financial processes and verify institutional policy adherence.", ["Audit", "Internal control", "Reporting"], "On-site"),
+
+  // Supply Chain & Logistics (Company 4 - Bayon Logistics & Freight)
+  makePositionSeed("អ្នកគ្រប់គ្រងប្រតិបត្តិការកំពង់ផែ", "Port Operations Supervisor", "Supply Chain", 4, "Sihanoukville", "$700 - $1,100", "3+ years", "Coordinate cargo loading, maritime handling, and terminal operations safely.", ["Port operations", "Safety", "Cargo management"], "On-site"),
+  makePositionSeed("មន្ត្រីសម្របសម្រួលគយ", "Customs Clearance Officer", "Supply Chain", 4, "Sihanoukville", "$550 - $850", "2+ years", "Handle import/export customs clearance documents and port tariff approvals.", ["Customs regulations", "Documentation", "Tariff clearance"], "On-site"),
+  makePositionSeed("អ្នករៀបចំផែនការភស្តុភារ", "Logistics Planner", "Supply Chain", 4, "Phnom Penh", "$600 - $900", "2+ years", "Optimize inland container routing and multimodal fleet scheduling.", ["Route optimization", "Fleet scheduling", "Cost control"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងឃ្លាំងធំ", "Senior Warehouse Manager", "Supply Chain", 4, "Phnom Penh", "$900 - $1,400", "4+ years", "Oversee automated inventory storage and regional distribution networks.", ["Warehouse operations", "WMS", "Team leadership"], "On-site"),
+  makePositionSeed("មន្ត្រីលទ្ធកម្មអន្តរជាតិ", "Procurement Specialist", "Supply Chain", 4, "Phnom Penh", "$700 - $1,050", "3+ years", "Source international logistics equipment and negotiate vendor contracts.", ["Vendor negotiation", "Procurement", "Contract management"], "Hybrid"),
+
+  // Marketing & Tech (Company 5 - Kirirom Media & Tech)
+  makePositionSeed("អ្នកគ្រប់គ្រងយុទ្ធនាការឌីជីថល", "Senior Digital Campaign Manager", "Sales & Marketing", 5, "Phnom Penh", "$850 - $1,400", "3+ years", "Lead high-converting Meta, Google, and TikTok campaigns for top brands.", ["Performance marketing", "Meta Ads", "Analytics"], "Hybrid"),
+  makePositionSeed("អ្នកផលិតមាតិកាវីដេអូ", "Video Producer & Editor", "Creative & Design", 5, "Phnom Penh", "$600 - $950", "2+ years", "Shoot, produce, and edit engaging commercial video content and reels.", ["Premiere Pro", "CapCut", "Cinematography"], "Hybrid"),
+  makePositionSeed("អ្នកសរសេរអត្ថបទផ្សាយពាណិជ្ជកម្ម", "Copywriter & Content Strategist", "Sales & Marketing", 5, "Phnom Penh", "$550 - $850", "2+ years", "Craft impactful storytelling in Khmer and English across multi-channel campaigns.", ["Copywriting", "Storytelling", "SEO"], "Hybrid"),
+  makePositionSeed("អ្នករចនាក្រាហ្វិក 3D & Motion", "Motion Graphic Designer", "Creative & Design", 5, "Phnom Penh", "$700 - $1,200", "2+ years", "Bring brand animations and commercial broadcast motion design to life.", ["After Effects", "Blender", "Motion design"], "Hybrid"),
+  makePositionSeed("អ្នកសម្របសម្រួលព្រឹត្តិការណ៍", "Event & Activation Lead", "Sales & Marketing", 5, "Phnom Penh", "$650 - $1,000", "2+ years", "Plan and execute energetic product launch events and corporate showcases.", ["Event production", "Vendor coordination", "Budget management"], "On-site"),
+
+  // Agriculture & Manufacturing (Company 6 - Battambang Agri-Food)
+  makePositionSeed("មន្ត្រីត្រួតពិនិត្យគុណភាពអាហារ", "Food Quality Assurance Officer", "Operations", 6, "Battambang", "$500 - $800", "2+ years", "Ensure HACCP and GMP quality control standards in food processing plant.", ["HACCP", "GMP", "Quality testing"], "On-site"),
+  makePositionSeed("វិស្វករថែទាំគ្រឿងចក្រ", "Industrial Maintenance Engineer", "Engineering", 6, "Battambang", "$700 - $1,100", "3+ years", "Maintain processing factory machinery and implement preventive schedules.", ["Industrial automation", "Electrical systems", "Preventive maintenance"], "On-site"),
+  makePositionSeed("អ្នកគ្រប់គ្រងខ្សែសង្វាក់ផលិតកម្ម", "Production Line Supervisor", "Operations", 6, "Battambang", "$600 - $900", "3+ years", "Direct factory floor shifts to hit daily output goals and safety standards.", ["Shift management", "Lean manufacturing", "Safety"], "On-site"),
+  makePositionSeed("មន្ត្រីអភិវឌ្ឍន៍កសិកម្ម", "Agricultural Extension Officer", "Operations", 6, "Battambang", "$550 - $850", "2+ years", "Partner with local cooperative farmers to boost organic crop yields.", ["Crop management", "Farmer training", "Soil health"], "On-site"),
+
+  // Hospitality & Eco-Resort (Company 7 - Kampot Eco Resorts)
+  makePositionSeed("អ្នកគ្រប់គ្រងទូទៅនៃរីសត", "Resort General Manager", "Hospitality & Tourism", 7, "Kampot", "$1,200 - $2,200", "5+ years", "Direct high-end eco-resort guest satisfaction, F&B, and brand distinction.", ["Resort management", "P&L", "Guest delight"], "On-site"),
+  makePositionSeed("មេចុងភៅទទួលបន្ទុកម្ហូបអឺរ៉ុប-ខ្មែរ", "Executive Chef", "Hospitality & Tourism", 7, "Kampot", "$900 - $1,500", "4+ years", "Craft creative farm-to-table menus blending Khmer culinary heritage.", ["Culinary design", "Kitchen leadership", "Menu engineering"], "On-site"),
+  makePositionSeed("អ្នកគ្រប់គ្រងផ្នែកទទួលភ្ញៀវ", "Front Office Manager", "Hospitality & Tourism", 7, "Kampot", "$600 - $950", "3+ years", "Lead guest check-in, personalized concierge and VIP eco-excursions.", ["Front office", "Guest relations", "Reservation systems"], "On-site"),
+  makePositionSeed("មន្ត្រីផ្សព្វផ្សាយទេសចរណ៍អេកូឡូស៊ី", "Eco-Tourism Coordinator", "Hospitality & Tourism", 7, "Kampot", "$450 - $700", "1+ year", "Guide river cruises, kayak tours, and organic spice plantation tours.", ["Eco-tours", "English", "Customer care"], "On-site"),
+
+  // Modern Technology & Cloud (Company 1 - Sangkat Digital)
+  makePositionSeed("វិស្វករ DevOps & Cloud", "DevOps & Cloud Engineer", "Information Technology", 1, "Phnom Penh", "$1,200 - $2,000", "3+ years", "Automate CI/CD pipelines, container clustering, and AWS cloud security.", ["AWS", "Docker", "Kubernetes", "Terraform"], "Hybrid"),
+  makePositionSeed("អ្នកវិភាគទិន្នន័យជាន់ខ្ពស់", "Senior Data Analyst", "Information Technology", 1, "Phnom Penh", "$1,000 - $1,700", "3+ years", "Turn complex analytics into executive decision intelligence and dashboards.", ["SQL", "PowerBI", "Python", "Data modeling"], "Hybrid"),
+  makePositionSeed("អ្នកគ្រប់គ្រងផលិតផលឌីជីថល", "Digital Product Manager", "Information Technology", 1, "Phnom Penh", "$1,300 - $2,200", "4+ years", "Define product vision, user journey specifications, and sprint milestones.", ["Product roadmap", "Agile", "User stories"], "Hybrid"),
+  makePositionSeed("អ្នកសាកល្បងសូហ្វវែរស្វ័យប្រវត្តិ", "QA Automation Engineer", "Information Technology", 1, "Phnom Penh", "$800 - $1,300", "2+ years", "Author automated testing suites across web interfaces and backend APIs.", ["Cypress", "Selenium", "Jest", "API testing"], "Hybrid"),
+  makePositionSeed("វិស្វករសន្តិសុខសាយប័រ", "Cybersecurity Specialist", "Information Technology", 1, "Phnom Penh", "$1,100 - $1,900", "3+ years", "Harden cloud infrastructure and conduct regular network vulnerability audits.", ["Network security", "Penetration testing", "SOC"], "Hybrid"),
+];
+
+positionSeeds.push(...morePositionSeeds, ...extraDiverseSeeds);
 
 const additionalJobs: Job[] = positionSeeds.map((seed, index) => {
-  const company = companies[seed.companyIndex];
+  const company = companies[seed.companyIndex] || companies[0];
   const jobNumber = index + 5;
   const slug = `${seed.titleEnglish}-${company.slug}`
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  const contact = seed.companyIndex === 0
-    ? { email: "careers@lyhawhrsolution.com", phone: "+855 12 555 018" }
-    : seed.companyIndex === 1
-      ? { email: "jobs@sangkatdigital.com", phone: "+855 10 555 232" }
-      : { email: "hr@tonlehospitality.com", phone: "+855 63 555 111" };
+  const contact = { email: "lyhawhrsolution@gmail.com", phone: "+855 99 885 088" };
 
   return {
     id: `job-${String(jobNumber).padStart(3, "0")}`,
@@ -1056,7 +1167,7 @@ for (const job of jobs) {
   job.telegram = "https://t.me/lyhawhrsolution";
 }
 
-const articles: ArticleDetail[] = [
+let articles: ArticleDetail[] = [
   {
     id: "article-001",
     slug: "how-to-prepare-for-interview",
@@ -1098,9 +1209,57 @@ const articles: ArticleDetail[] = [
   },
 ];
 
+export type AdminLesson = {
+  id: string;
+  title: string;
+  category: string;
+  level: string;
+  duration: string;
+  summary: string;
+  lessons: string[];
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+let lessons: AdminLesson[] = [];
+
+type AdminSnapshot = {
+  companies: Company[];
+  jobs: Job[];
+  articles: ArticleDetail[];
+  lessons: AdminLesson[];
+};
+
+const snapshotPath = process.env.ADMIN_DATA_FILE || path.resolve(process.cwd(), "data", "admin-content.json");
+
+function loadAdminSnapshot(): void {
+  try {
+    if (!fs.existsSync(snapshotPath)) return;
+    const saved = JSON.parse(fs.readFileSync(snapshotPath, "utf8")) as Partial<AdminSnapshot>;
+    if (Array.isArray(saved.companies)) companies.splice(0, companies.length, ...saved.companies);
+    if (Array.isArray(saved.jobs)) jobs.splice(0, jobs.length, ...saved.jobs.map((job) => ({ ...job, publishedAt: new Date(String(job.publishedAt)), deadline: new Date(String(job.deadline)) })));
+    if (Array.isArray(saved.articles)) articles.splice(0, articles.length, ...saved.articles.map((article) => ({ ...article, publishedAt: new Date(String(article.publishedAt)) })));
+    if (Array.isArray(saved.lessons)) lessons = saved.lessons;
+  } catch (error) {
+    console.error("Unable to load admin content snapshot", error);
+  }
+}
+
+export function persistAdminSnapshot(): void {
+  const directory = path.dirname(snapshotPath);
+  const temporaryPath = `${snapshotPath}.tmp`;
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(temporaryPath, JSON.stringify({ companies, jobs, articles, lessons }, null, 2), "utf8");
+  fs.renameSync(temporaryPath, snapshotPath);
+}
+
+loadAdminSnapshot();
+
 export const recruitmentCompanies = companies;
 export const recruitmentJobs = jobs;
 export const recruitmentArticles = articles;
+export const recruitmentLessons = lessons;
 
 export const dashboardSummary: DashboardSummary = {
   totalJobs: jobs.length,
@@ -1116,6 +1275,17 @@ export const dashboardSummary: DashboardSummary = {
   companies: companies.length,
   categories: 8,
 };
+
+function refreshDashboardSummary(): void {
+  dashboardSummary.totalJobs = jobs.length;
+  dashboardSummary.publishedJobs = jobs.length;
+  dashboardSummary.featuredJobs = jobs.filter((job) => job.featured).length;
+  dashboardSummary.urgentJobs = jobs.filter((job) => job.urgent).length;
+  dashboardSummary.companies = companies.length;
+  dashboardSummary.categories = new Set(jobs.map((job) => job.category)).size;
+}
+
+refreshDashboardSummary();
 
 export function getCompanyDetail(slug: string): CompanyDetail | undefined {
   const company = companies.find((item) => item.slug === slug);
@@ -1133,4 +1303,104 @@ export function getArticleDetail(slug: string): ArticleDetail | undefined {
 export function getArticlePreview(article: ArticleDetail): Article {
   const { body: _body, ...preview } = article;
   return preview;
+}
+
+// ── CRUD helpers: Jobs ─────────────────────────────────────────────────────
+export function addJob(job: Job): Job {
+  jobs.push(job);
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return job;
+}
+
+export function updateJob(id: string, patch: Partial<Job>): Job | undefined {
+  const idx = jobs.findIndex((j) => j.id === id);
+  if (idx === -1) return undefined;
+  jobs[idx] = { ...jobs[idx], ...patch };
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return jobs[idx];
+}
+
+export function deleteJob(id: string): boolean {
+  const idx = jobs.findIndex((j) => j.id === id);
+  if (idx === -1) return false;
+  jobs.splice(idx, 1);
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return true;
+}
+
+// ── CRUD helpers: Companies ────────────────────────────────────────────────
+export function addCompany(company: Company): Company {
+  companies.push(company);
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return company;
+}
+
+export function updateCompany(id: string, patch: Partial<Company>): Company | undefined {
+  const idx = companies.findIndex((c) => c.id === id);
+  if (idx === -1) return undefined;
+  companies[idx] = { ...companies[idx], ...patch };
+  jobs.splice(0, jobs.length, ...jobs.map((job) => job.company.id === id ? { ...job, company: { ...job.company, ...companies[idx] } } : job));
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return companies[idx];
+}
+
+export function deleteCompany(id: string): boolean {
+  const idx = companies.findIndex((c) => c.id === id);
+  if (idx === -1) return false;
+  if (jobs.some((job) => job.company.id === id)) return false;
+  companies.splice(idx, 1);
+  refreshDashboardSummary();
+  persistAdminSnapshot();
+  return true;
+}
+
+// ── CRUD helpers: Articles ─────────────────────────────────────────────────
+export function addArticle(article: ArticleDetail): ArticleDetail {
+  articles.push(article);
+  persistAdminSnapshot();
+  return article;
+}
+
+export function updateArticle(id: string, patch: Partial<ArticleDetail>): ArticleDetail | undefined {
+  const idx = articles.findIndex((a) => a.id === id);
+  if (idx === -1) return undefined;
+  articles[idx] = { ...articles[idx], ...patch };
+  persistAdminSnapshot();
+  return articles[idx];
+}
+
+export function deleteArticle(id: string): boolean {
+  const idx = articles.findIndex((a) => a.id === id);
+  if (idx === -1) return false;
+  articles.splice(idx, 1);
+  persistAdminSnapshot();
+  return true;
+}
+
+// ── CRUD helpers: Lessons ─────────────────────────────────────────────────
+export function addLesson(lesson: AdminLesson): AdminLesson {
+  lessons.push(lesson);
+  persistAdminSnapshot();
+  return lesson;
+}
+
+export function updateLesson(id: string, patch: Partial<AdminLesson>): AdminLesson | undefined {
+  const idx = lessons.findIndex((lesson) => lesson.id === id);
+  if (idx === -1) return undefined;
+  lessons[idx] = { ...lessons[idx], ...patch, updatedAt: new Date().toISOString() };
+  persistAdminSnapshot();
+  return lessons[idx];
+}
+
+export function deleteLesson(id: string): boolean {
+  const idx = lessons.findIndex((lesson) => lesson.id === id);
+  if (idx === -1) return false;
+  lessons.splice(idx, 1);
+  persistAdminSnapshot();
+  return true;
 }
